@@ -1,5 +1,33 @@
 @import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);@charset "UTF-8";
 
+.gallery_product {
+  margin-bottom: 30px;
+}
+
+.thumb {
+  position: relative;
+  overflow: hidden;
+  width: 320px;
+}
+
+.caption {
+  position: absolute;
+  top: 100%;
+  right: 0%;
+  background: rgba(66, 139, 202, 0.75);
+  width: 100%;
+  height: 25%;
+  text-align: center;
+  color: #fff !important;
+  z-index: 2;
+  -webkit-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+.thumb:hover .caption {
+  top: 75%;
+}
+
 /*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
  * Copyright 2011-2016 Twitter, Inc.
