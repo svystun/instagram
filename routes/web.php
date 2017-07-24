@@ -11,10 +11,14 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::group(['middleware' => 'auth'], function(){
+
+    Route::get('/', 'HomeController@index')->name('index');
+    Route::get('/home', 'HomeController@index')->name('home');
+    Route::post('/store', 'HomeController@store')->name('store');
+    Route::delete('/delete', 'HomeController@delete')->name('delete');
+
+    Route::get('/gallery', 'HomeController@gallery')->name('gallery');
+});
