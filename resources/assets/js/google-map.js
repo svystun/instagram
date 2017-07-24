@@ -6,12 +6,12 @@ Vue.use(VueGoogleMaps, {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-    new Vue({
+    const map = new Vue({
         el: '#google-map',
         data: {
             center: {
-                lat: 47.376332,
-                lng: 8.547511
+                lat: 0,
+                lng: 0
             },
             infoContent: '',
             infoWindowPos: {
@@ -27,36 +27,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     height: -35
                 }
             },
-            markers: []
+            markers: [],
+            desc: [],
+            images: []
         },
         mounted: function () {
+            var $this = this;
+            $('.location-name').each(function (index, value) {
+                $this.desc.push($.trim($(this).text()));
+            });
 
-            // $('.location-name').each(function (index, value) {
-            //     console.log(index + ': ' + $.trim($(this).text()));
-            // });
+            $('.image-url').each(function (index, value) {
+                $this.images.push($(this).prop('src'));
+            });
 
-            // axios.get('/get-coordinates?q=').then(function(responce) {
-            //     console.log(responce);
-            //
-            // }).catch(function(error) {
-            //     console.log(error);
-            // });
-
-
-            // this.markers = [
-            // {
-            //     position: {
-            //         lat: 47.376332,
-            //         lng: 8.547511
-            //     },
-            //     infoText: '<strong>Marker 1</strong>'
-            // }, {
-            //     position: {
-            //         lat: 47.374592,
-            //         lng: 8.548867
-            //     },
-            //     infoText: 'Marker 2'
-            // }];
+            this.recursion();
         },
         methods: {
             toggleInfoWindow: function(marker, idx) {
@@ -74,17 +59,41 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.currentMidx = idx;
 
                 }
+            },
+
+            recursion: function() {
+                var $this = this;
+                if ($this.desc.length == 0) return;
+                google_geocoding.geocode($this.desc[0], function(err, location) {
+                    if( err ) {
+                        console.log('Error: ' + err);
+                        $this.desc.splice(0, 1);
+                        $this.recursion();
+                    } else if( !location ) {
+                        console.log('No result.');
+                        $this.desc.splice(0, 1);
+                        $this.recursion();
+                    } else {
+                        $this.markers.push({
+                            position: {
+                                lat: location.lat,
+                                lng: location.lng
+                            },
+                            infoText: 'Latitude: ' + location.lat + ' ; Longitude: ' + location.lng
+                        });
+
+                        if ($this.desc.length == 1) {
+                            $this.center = {
+                                lat: location.lat,
+                                lng: location.lng
+                            }
+                        }
+
+                        $this.desc.splice(0, 1);
+                        $this.recursion();
+                    }
+                });
             }
-            
-            // pushMarker: function () {
-            //     this.markers.push({
-            //         position: {
-            //             lat: 47.379592,
-            //             lng: 8.549867
-            //         },
-            //         infoText: 'Marker 3'
-            //     });
-            // }
 
         }
     });
