@@ -15,8 +15,65 @@ window.Vue = require('vue');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('example', require('./components/Example.vue'));
+//Vue.component('example', require('./components/Example.vue'));
 
 const app = new Vue({
-    el: '#app'
+    el: '#app',
+    data: {
+        loading: false
+    },
+    methods: {
+        storePost: function (id) {
+            var pref = '#' + id;
+            var postFields = {
+                insta_id: $(pref + ' .thumb-id').html(),
+                insta_url: $(pref + ' .image-url').prop('src'),
+                insta_caption: $(pref + ' .caption-text').html(),
+                insta_user: $(pref + ' .user-name').html(),
+                insta_name: $(pref + ' .location-name').html(),
+                insta_time: $(pref + ' .time').html(),
+                insta_type: $(pref + ' .type').html()
+            };
+            this.loading = true;
+            axios.post('/store', postFields).then(function(responce) {
+                app.loading = false;
+                if (responce.data.status == 'success') {
+                    $(pref + 'thumb').slideUp("slow", function () {
+                        $(this).remove();
+                    });
+                }
+
+                if (responce.data.status == 'error') {
+                    alert(responce.data.message);
+                }
+
+            }).catch(function(error) {
+                app.loading = false;
+                console.log(error);
+            });
+        },
+
+        deletePost: function (id) {
+            this.loading = true;
+            axios.post('/delete', {'_method': 'delete', 'id': id}).then(function(responce) {
+                app.loading = false;
+                if (responce.data.status == 'success') {
+                    $('#' + id).slideUp("slow", function () {
+                        $(this).remove();
+                    });
+                }
+
+                if (responce.data.status == 'error') {
+                    alert(responce.data.message);
+                }
+            }).catch(function(error) {
+                app.loading = false;
+                console.log(error);
+            });
+        }
+    }
 });
+
+if ($('#google-map').length > 0){
+    require('./google-map');
+}
