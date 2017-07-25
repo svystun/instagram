@@ -49,18 +49,35 @@ class HomeController extends Controller
 //            'body' => 'required',
 //        ])->validate();
 
+        $response = $this->isExists($request);
+
+        if ($response['status'] == 'error') {
+            return response($response);
+        }
+
+        $request->merge(['user_id' => Auth::user()->id]);
+        Posts::create($request->all());
+
+        return response($response);
+    }
+
+    /**
+     * Check if content exists
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function isExists(Request $request)
+    {
         $status = ['status' => 'success', 'message' => 'No errors'];
 
         if (Posts::where('insta_id', $request->input('insta_id'))->first()) {
             $status['status'] = 'error';
             $status['message'] = 'Already exists!';
-            return response($status);
+            return $status;
         }
-        $request->merge(['user_id' => Auth::user()->id]);
 
-        Posts::create($request->all());
-
-        return response($status);
+        return $status;
     }
 
     /**

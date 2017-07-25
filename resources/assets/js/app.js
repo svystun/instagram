@@ -17,20 +17,20 @@ window.Vue = require('vue');
 
 //Vue.component('example', require('./components/Example.vue'));
 
-const app = new Vue({
+var app = new Vue({
     el: '#app',
     data: {
         loading: false
     },
     methods: {
-        storePost: function (id) {
+        storePost: function (id, button) {
             var pref = '#' + id;
             var postFields = {
                 insta_id: $(pref + ' .thumb-id').html(),
                 insta_url: $(pref + ' .image-url').prop('src'),
-                insta_caption: $(pref + ' .caption-text').html(),
+                insta_caption: $.trim($(pref + ' .caption-text').html()),
                 insta_user: $(pref + ' .user-name').html(),
-                insta_name: $(pref + ' .location-name').html(),
+                insta_name: $.trim($(pref + ' .location-name').html()),
                 insta_time: $(pref + ' .time').html(),
                 insta_type: $(pref + ' .type').html()
             };
@@ -46,7 +46,11 @@ const app = new Vue({
                 if (responce.data.status == 'error') {
                     alert(responce.data.message);
                 }
-
+                // Disable button in InfoWindow (Google Map)
+                $(button).prop("disabled",true).css({'color': 'lightgray'})
+                    .addClass('label-default')
+                    .removeClass('label-danger')
+                    .text('SAVED');
             }).catch(function(error) {
                 app.loading = false;
                 console.log(error);
@@ -62,7 +66,6 @@ const app = new Vue({
                         $(this).remove();
                     });
                 }
-
                 if (responce.data.status == 'error') {
                     alert(responce.data.message);
                 }

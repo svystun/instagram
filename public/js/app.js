@@ -24919,14 +24919,14 @@ var app = new Vue({
         loading: false
     },
     methods: {
-        storePost: function storePost(id) {
+        storePost: function storePost(id, button) {
             var pref = '#' + id;
             var postFields = {
                 insta_id: $(pref + ' .thumb-id').html(),
                 insta_url: $(pref + ' .image-url').prop('src'),
-                insta_caption: $(pref + ' .caption-text').html(),
+                insta_caption: $.trim($(pref + ' .caption-text').html()),
                 insta_user: $(pref + ' .user-name').html(),
-                insta_name: $(pref + ' .location-name').html(),
+                insta_name: $.trim($(pref + ' .location-name').html()),
                 insta_time: $(pref + ' .time').html(),
                 insta_type: $(pref + ' .type').html()
             };
@@ -24942,6 +24942,8 @@ var app = new Vue({
                 if (responce.data.status == 'error') {
                     alert(responce.data.message);
                 }
+                // Disable button in InfoWindow (Google Map)
+                $(button).prop("disabled", true).css({ 'color': 'lightgray' }).addClass('label-default').removeClass('label-danger').text('SAVED');
             }).catch(function (error) {
                 app.loading = false;
                 console.log(error);
@@ -24957,7 +24959,6 @@ var app = new Vue({
                         $(this).remove();
                     });
                 }
-
                 if (responce.data.status == 'error') {
                     alert(responce.data.message);
                 }
@@ -57067,6 +57068,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 lat: 0,
                 lng: 0
             },
+            statusText: '',
             infoContent: '',
             infoWindowPos: {
                 lat: 0,
@@ -57082,19 +57084,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             markers: [],
-            desc: [],
+            dataArr: [],
             images: []
         },
         mounted: function mounted() {
             var $this = this;
-            $('.location-name').each(function (index, value) {
-                $this.desc.push($.trim($(this).text()));
+            $('#statusTextBox').show();
+            $('.thumb').each(function (index, value) {
+                $this.dataArr.push({
+                    id: $(this).attr('id'),
+                    url: $(this).children('.image-url').prop('src'),
+                    txt: $.trim($(this).children('.caption').children('.location-name').html()),
+                    insta_id: $(this).children().children('.thumb-id').html()
+                });
             });
-
-            $('.image-url').each(function (index, value) {
-                $this.images.push($(this).prop('src'));
-            });
-
+            // Set markers
             this.recursion();
         },
         methods: {
@@ -57103,51 +57107,65 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.infoWindowPos = marker.position;
                 this.infoContent = marker.infoText;
 
-                //check if its the same marker that was selected if yes toggle
+                // Check if its the same marker that was selected if yes toggle
                 if (this.currentMidx == idx) {
                     this.infoWinOpen = !this.infoWinOpen;
+                } else {
+                    // If different marker set infowindow to open and reset current marker index
+                    this.infoWinOpen = true;
+                    this.currentMidx = idx;
                 }
-                //if different marker set infowindow to open and reset current marker index
-                else {
-                        this.infoWinOpen = true;
-                        this.currentMidx = idx;
-                    }
-            },
 
+                if (this.infoWinOpen) {
+                    // Change content of infowindow
+                    var button = '<button type="button" class="label label-danger" onclick="app.__vue__.storePost(\'' + marker.id + '\', this)">SAVE</button>';
+                    axios.get('/exists?insta_id=' + marker.insta_id).then(function (responce) {
+                        if (responce.data.status == 'success') {
+                            $('#' + marker.id + 'info').html(button);
+                        }
+                        if (responce.data.status == 'error') {
+                            //
+                        }
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+            },
             recursion: function recursion() {
                 var $this = this;
-                if ($this.desc.length == 0) return;
-                google_geocoding.geocode($this.desc[0], function (err, location) {
+                if ($this.dataArr.length == 0) return;
+                google_geocoding.geocode($this.dataArr[0].txt, function (err, location) {
                     if (err) {
                         console.log('Error: ' + err);
-                        $this.desc.splice(0, 1);
+                        $this.dataArr.splice(0, 1);
                         $this.recursion();
                     } else if (!location) {
                         console.log('No result.');
-                        $this.desc.splice(0, 1);
+                        $this.dataArr.splice(0, 1);
                         $this.recursion();
                     } else {
+                        // Create marker
                         $this.markers.push({
-                            position: {
-                                lat: location.lat,
-                                lng: location.lng
-                            },
-                            infoText: 'Latitude: ' + location.lat + ' ; Longitude: ' + location.lng
+                            position: { lat: location.lat, lng: location.lng },
+                            infoText: $this.thumbnail($this.dataArr[0]),
+                            text: $this.dataArr[0].txt,
+                            id: $this.dataArr[0].id,
+                            insta_id: $this.dataArr[0].insta_id
                         });
-
-                        if ($this.desc.length == 1) {
+                        if ($this.dataArr.length == 1) {
                             $this.center = {
                                 lat: location.lat,
                                 lng: location.lng
                             };
                         }
-
-                        $this.desc.splice(0, 1);
+                        $this.dataArr.splice(0, 1);
                         $this.recursion();
                     }
                 });
+            },
+            thumbnail: function thumbnail(data) {
+                return '<img src="' + data.url + '" height="60" width="60" /></br>' + '<div style="text-align: center" id="' + data.id + 'info"></div>';
             }
-
         }
     });
 });

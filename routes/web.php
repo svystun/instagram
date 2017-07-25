@@ -18,6 +18,7 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/', 'HomeController@index')->name('index');
     Route::get('/home', 'HomeController@index')->name('home');
     Route::post('/store', 'HomeController@store')->name('store');
+    Route::get('/exists', 'HomeController@isExists')->name('exists');
     Route::delete('/delete', 'HomeController@delete')->name('delete');
 
     Route::get('/gallery', 'HomeController@gallery')->name('gallery');

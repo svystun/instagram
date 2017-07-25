@@ -84,7 +84,12 @@
         <div id="google-map">
             <gmap-map :center="center" :zoom="5" style="width: 100%; height: 500px">
                 <gmap-info-window :options="infoOptions" :position="infoWindowPos" :opened="infoWinOpen" :content="infoContent" @closeclick="infoWinOpen=false"></gmap-info-window>
-                <gmap-marker :key="i" v-for="(m,i) in markers" :position="m.position" :clickable="true" @click="toggleInfoWindow(m,i)"></gmap-marker>
+                <gmap-marker :key="i" v-for="(m,i) in markers" :position="m.position" :clickable="true" @click="toggleInfoWindow(m,i)" @mouseover="statusText = m.text" @mouseout="statusText = null"></gmap-marker>
+                <div slot="visible" id="statusTextBox" style="display: none">
+                    <div class="statusBox">
+                        @{{ statusText }}
+                    </div>
+                </div>
             </gmap-map>
         </div>
     @endif
