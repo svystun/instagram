@@ -1,8 +1,9 @@
 <?php namespace App\Http\Controllers;
 
-use App\Repositories\InstagramRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use InstagramScraper\Instagram;
+use InstagramScraper\Exception\{InstagramNotFoundException, InstagramException};
 use Illuminate\Support\Facades\Auth;
 use App\Posts;
 
@@ -16,20 +17,19 @@ class HomeController extends Controller
      * Show the application dashboard.
      *
      * @param Request $request
-     * @param InstagramRepository $instagram
+     * @param Instagram $instagram
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index(Request $request, InstagramRepository $instagram)
+    public function index(Request $request, Instagram $instagram)
     {
         $items = []; $errors = []; $user = NULL;
         if ($request->has('search')) {
             try {
-                $user = $instagram->getUser($request->get('search'));
-                if ($user->is_private) {
-                    throw new \Exception('It`s private account! Content is not accessible');
-                }
-                $items = $instagram->getItems($request->get('search'));
-            } catch (\Exception $e) {
+                $user = $instagram->getAccount($request->input('search'));
+                $items = $instagram->getMedias($request->input('search'));
+            } catch (InstagramNotFoundException $e) {
+                $errors[] = $e->getMessage();
+            } catch (InstagramException $e) {
                 $errors[] = $e->getMessage();
             }
         }
