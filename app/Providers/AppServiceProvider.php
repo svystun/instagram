@@ -1,7 +1,7 @@
 <?php namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Laravel\Dusk\DuskServiceProvider;
+use Jenssegers\Mongodb\Eloquent\Builder;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +23,11 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         if ($this->app->environment('local', 'testing')) {
-            $this->app->register(DuskServiceProvider::class);
+            $this->app->register(\Laravel\Dusk\DuskServiceProvider::class);
+            $this->app->register(\Staudenmeir\DuskUpdater\DuskServiceProvider::class);
+            Builder::macro('getName', function() {
+                return $this->getModel()->getConnectionName();
+            });
         }
     }
 }
