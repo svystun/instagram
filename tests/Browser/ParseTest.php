@@ -23,4 +23,20 @@ class ParseTest extends DuskTestCase
                 ->assertSee('Paris');
         });
     }
+
+    /**
+     * @throws \Throwable
+     */
+    public function testImageSave()
+    {
+        //
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function testGalleryCheck()
+    {
+        //
+    }
 }
