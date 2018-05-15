@@ -37,13 +37,13 @@ var app = new Vue({
             this.loading = true;
             axios.post('/store', postFields).then(function(responce) {
                 app.loading = false;
-                if (responce.data.status == 'success') {
+                if (responce.data.status === 'success') {
                     $(pref + 'thumb').slideUp("slow", function () {
                         $(this).remove();
                     });
                 }
 
-                if (responce.data.status == 'error') {
+                if (responce.data.status === 'error') {
                     alert(responce.data.message);
                 }
                 // Disable button in InfoWindow (Google Map)
@@ -61,12 +61,12 @@ var app = new Vue({
             this.loading = true;
             axios.post('/delete', {'_method': 'delete', 'id': id}).then(function(responce) {
                 app.loading = false;
-                if (responce.data.status == 'success') {
+                if (responce.data.status === 'success') {
                     $('#' + id).slideUp("slow", function () {
                         $(this).remove();
                     });
                 }
-                if (responce.data.status == 'error') {
+                if (responce.data.status === 'error') {
                     alert(responce.data.message);
                 }
             }).catch(function(error) {
