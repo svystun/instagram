@@ -12,8 +12,6 @@ class ParseTest extends DuskTestCase
      */
     public function testSearch()
     {
-        $faker = \Faker\Factory::create();
-
         $this->browse(function (Browser $browser) {
             $browser->loginAs(User::first())
                 ->visit('/')
@@ -29,7 +27,15 @@ class ParseTest extends DuskTestCase
      */
     public function testImageSave()
     {
-        //
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                ->assertSee('Search bar')
+                ->type('search', 'paris')
+                ->press('Search')
+                ->waitForText('Search results')
+                ->mouseover('.label-danger')
+                ->click('.label-danger');
+        });
     }
 
     /**
@@ -37,6 +43,11 @@ class ParseTest extends DuskTestCase
      */
     public function testGalleryCheck()
     {
-        //
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/gallery')
+                ->assertSee('My Gallery')
+                ->mouseover('.label-danger')
+                ->click('.label-danger');
+        });
     }
 }
